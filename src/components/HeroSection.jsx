@@ -49,15 +49,6 @@ export default function HeroSection({ onProgressChange }) {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
 
-    const setSize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      // Redraw current frame after resize
-      drawFrame(Math.floor(scrollProgress * (TOTAL_FRAMES - 1)))
-    }
-    setSize()
-    window.addEventListener('resize', setSize)
-
     const drawFrame = (frameIdx) => {
       const sprite = spriteRef.current
       if (!sprite) return
@@ -95,6 +86,14 @@ export default function HeroSection({ onProgressChange }) {
       ctx.fillStyle = grad
       ctx.fillRect(0, 0, canvas.width, canvas.height)
     }
+
+    const setSize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      drawFrame(Math.floor(scrollProgress * (TOTAL_FRAMES - 1)))
+    }
+    setSize()
+    window.addEventListener('resize', setSize)
 
     const onScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
