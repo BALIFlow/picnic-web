@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 
 export const HERO_HEIGHT_VH = 800
 
-const VIDEO_SRC = '/assets/hero_scrub.mp4'
-const DURATION = 33.36
-const TOTAL_FRAMES = 180
+// Sprite sheet: 90 frames arranged in a 9x10 grid, each frame 640x360
+const SPRITE_SRC = '/assets/frames.jpg'
+const TOTAL_FRAMES = 90
+const COLS = 9
+const FRAME_W = 640
+const FRAME_H = 360
 
-// Clip durations: 4.06, 5.06, 5.06, 7.06, 5.06, 7.06 = 33.36s
-// Each phrase shows in the middle 60% of its clip's scroll zone
+// Clip boundaries as fraction of total (durations: 4.06, 5.06, 5.06, 7.06, 5.06, 7.06 = 33.36s)
 const CLIP_BOUNDARIES = [0, 4.06, 9.12, 14.18, 21.24, 26.30, 33.36].map(t => t / 33.36)
 const PHRASES = [
   { line1: 'Todo empieza',             line2: 'con la masa.' },
@@ -20,62 +22,29 @@ const PHRASES = [
   const start = CLIP_BOUNDARIES[i]
   const end = CLIP_BOUNDARIES[i + 1]
   const span = end - start
-  return {
-    ...text,
-    from: start + span * 0.15,
-    to: end - span * 0.15,
-  }
+  return { ...text, from: start + span * 0.15, to: end - span * 0.15 }
 })
 
 export default function HeroSection({ onProgressChange }) {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
-  const framesRef = useRef([])
+  const spriteRef = useRef(null)
   const rafRef = useRef(null)
-  const [loadProgress, setLoadProgress] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [inHero, setInHero] = useState(true)
 
-  // --- Extract all frames from video ---
+  // Load sprite sheet once
   useEffect(() => {
-    const video = document.createElement('video')
-    video.src = VIDEO_SRC
-    video.muted = true
-    video.playsInline = true
-
-    const offscreen = document.createElement('canvas')
-    offscreen.width = 1280
-    offscreen.height = 720
-    const offCtx = offscreen.getContext('2d')
-
-    const frames = []
-    let frameIndex = 0
-    const step = DURATION / TOTAL_FRAMES
-
-    const seekNext = () => {
-      if (frameIndex >= TOTAL_FRAMES) {
-        framesRef.current = frames
-        setLoaded(true)
-        return
-      }
-      video.currentTime = frameIndex * step
+    const img = new Image()
+    img.src = SPRITE_SRC
+    img.onload = () => {
+      spriteRef.current = img
+      setLoaded(true)
     }
-
-    video.addEventListener('loadedmetadata', seekNext)
-    video.addEventListener('seeked', async () => {
-      offCtx.drawImage(video, 0, 0, 1280, 720)
-      const bitmap = await createImageBitmap(offscreen)
-      frames.push(bitmap)
-      frameIndex++
-      setLoadProgress(Math.round((frameIndex / TOTAL_FRAMES) * 100))
-      seekNext()
-    })
-
-    video.load()
   }, [])
 
-  // --- Fixed canvas: draw frame on scroll ---
+  // Draw + scroll handler
   useEffect(() => {
     if (!loaded) return
 
@@ -85,29 +54,42 @@ export default function HeroSection({ onProgressChange }) {
     const setSize = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
+      // Redraw current frame after resize
+      drawFrame(Math.floor(scrollProgress * (TOTAL_FRAMES - 1)))
     }
     setSize()
     window.addEventListener('resize', setSize)
 
     const drawFrame = (frameIdx) => {
-      const frame = framesRef.current[Math.min(frameIdx, framesRef.current.length - 1)]
-      if (!frame) return
+      const sprite = spriteRef.current
+      if (!sprite) return
+      const col = frameIdx % COLS
+      const row = Math.floor(frameIdx / COLS)
+      const sx = col * FRAME_W
+      const sy = row * FRAME_H
+
+      // Black background
       ctx.fillStyle = '#000'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // Draw frame centered at 78% screen size with rounded clip
       const maxW = canvas.width * 0.78
       const maxH = canvas.height * 0.78
-      const scale = Math.min(maxW / 1280, maxH / 720)
-      const w = 1280 * scale
-      const h = 720 * scale
-      const x = (canvas.width - w) / 2
-      const y = (canvas.height - h) / 2
+      const scale = Math.min(maxW / FRAME_W, maxH / FRAME_H)
+      const dw = FRAME_W * scale
+      const dh = FRAME_H * scale
+      const dx = (canvas.width - dw) / 2
+      const dy = (canvas.height - dh) / 2
+
       ctx.save()
-      roundRect(ctx, x, y, w, h, 12)
+      roundRect(ctx, dx, dy, dw, dh, 12)
       ctx.clip()
-      ctx.drawImage(frame, x, y, w, h)
+      ctx.drawImage(sprite, sx, sy, FRAME_W, FRAME_H, dx, dy, dw, dh)
       ctx.restore()
+
+      // Vignette
       const grad = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, Math.min(w, h) * 0.3,
+        canvas.width / 2, canvas.height / 2, Math.min(dw, dh) * 0.3,
         canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) * 0.65
       )
       grad.addColorStop(0, 'rgba(0,0,0,0)')
@@ -126,8 +108,7 @@ export default function HeroSection({ onProgressChange }) {
         const scrolled = window.scrollY - containerTop
         const totalScroll = container.offsetHeight - window.innerHeight
         const p = Math.max(0, Math.min(1, scrolled / totalScroll))
-        const pastHero = rect.bottom <= 0
-        setInHero(!pastHero)
+        setInHero(rect.bottom > 0)
         setScrollProgress(p)
         onProgressChange?.(p)
         drawFrame(Math.floor(p * (TOTAL_FRAMES - 1)))
@@ -147,7 +128,7 @@ export default function HeroSection({ onProgressChange }) {
 
   return (
     <>
-      {/* Loading screen */}
+      {/* Loading screen — shows while sprite downloads */}
       {!loaded && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 999, background: '#000',
@@ -156,10 +137,10 @@ export default function HeroSection({ onProgressChange }) {
         }}>
           <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 900, color: '#f7f3ed', fontSize: '2.5rem', letterSpacing: '0.25em' }}>PICNIC</p>
           <div style={{ width: '200px', height: '2px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: '#c94a1a', width: `${loadProgress}%`, transition: 'width 0.1s linear' }} />
+            <div style={{ height: '100%', background: '#c94a1a', width: '100%', animation: 'pulse 1.5s ease-in-out infinite', opacity: 0.6 }} />
           </div>
           <p style={{ fontFamily: 'Inter, sans-serif', color: 'rgba(247,243,237,0.3)', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-            Preparando tu experiencia… {loadProgress}%
+            Cargando…
           </p>
         </div>
       )}
@@ -167,7 +148,7 @@ export default function HeroSection({ onProgressChange }) {
       {/* Scroll spacer */}
       <div ref={containerRef} id="inicio" style={{ height: `${HERO_HEIGHT_VH}vh` }} />
 
-      {/* Fixed canvas layer — disappears when hero spacer is fully scrolled past */}
+      {/* Fixed canvas layer */}
       {loaded && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -195,13 +176,13 @@ export default function HeroSection({ onProgressChange }) {
                   color: 'rgba(247,243,237,0.95)', lineHeight: 1.3,
                   textShadow: '0 2px 20px rgba(0,0,0,0.8)',
                 }}>
-                  {phrase.line1}<br />{phrase.line2}
+                  {phrase.line1}{phrase.line2 && <><br />{phrase.line2}</>}
                 </p>
               </div>
             )
           })}
 
-          {/* Hero CTA — fades in at end */}
+          {/* Hero CTA */}
           <div style={{
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column',
@@ -253,9 +234,6 @@ export default function HeroSection({ onProgressChange }) {
           }} />
         </div>
       )}
-
-      {/* MarqueeStrip placeholder spacer — keeps layout correct so marquee
-          appears immediately after the scroll spacer with no gap */}
     </>
   )
 }
