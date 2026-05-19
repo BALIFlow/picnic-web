@@ -6,8 +6,8 @@ export const HERO_HEIGHT_VH = 800
 const SPRITE_SRC = '/assets/frames.jpg'
 const TOTAL_FRAMES = 90
 const COLS = 9
-const FRAME_W = 640
-const FRAME_H = 360
+const FRAME_W = 1280
+const FRAME_H = 720
 
 // Clip boundaries as fraction of total (durations: 4.06, 5.06, 5.06, 7.06, 5.06, 7.06 = 33.36s)
 const CLIP_BOUNDARIES = [0, 4.06, 9.12, 14.18, 21.24, 26.30, 33.36].map(t => t / 33.36)
