@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: auto; }
+  body { font-family: 'Inter', sans-serif; background: #000; color: #f7f3ed; -webkit-font-smoothing: antialiased; }
+  #root { width: 100%; max-width: 100%; }
+}
+
+@layer utilities {
+  .reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.from-left { transform: translateX(-40px); }
+  .reveal.from-right { transform: translateX(40px); }
+  .reveal.visible { opacity: 1; transform: translate(0); }
+
+  .parallax-bg { background-attachment: fixed; background-size: cover; background-position: center; }
+}
