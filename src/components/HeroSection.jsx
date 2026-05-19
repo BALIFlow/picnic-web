@@ -61,9 +61,10 @@ export default function HeroSection({ onProgressChange }) {
       ctx.fillStyle = '#000'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Draw frame centered at 78% screen size with rounded clip
-      const maxW = canvas.width * 0.78
-      const maxH = canvas.height * 0.78
+      // Full-bleed on mobile, inset on desktop
+      const isMobile = canvas.width < 768
+      const maxW = isMobile ? canvas.width : canvas.width * 0.78
+      const maxH = isMobile ? canvas.height : canvas.height * 0.78
       const scale = Math.min(maxW / FRAME_W, maxH / FRAME_H)
       const dw = FRAME_W * scale
       const dh = FRAME_H * scale
@@ -71,7 +72,7 @@ export default function HeroSection({ onProgressChange }) {
       const dy = (canvas.height - dh) / 2
 
       ctx.save()
-      roundRect(ctx, dx, dy, dw, dh, 12)
+      roundRect(ctx, dx, dy, dw, dh, isMobile ? 0 : 12)
       ctx.clip()
       ctx.drawImage(sprite, sx, sy, FRAME_W, FRAME_H, dx, dy, dw, dh)
       ctx.restore()
