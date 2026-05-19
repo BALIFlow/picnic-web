@@ -37,11 +37,9 @@ export default function HeroSection({ onProgressChange }) {
   // Load sprite sheet once
   useEffect(() => {
     const img = new Image()
+    img.onload = () => { spriteRef.current = img; setLoaded(true) }
+    img.onerror = () => { console.error('Failed to load sprite sheet:', SPRITE_SRC) }
     img.src = SPRITE_SRC
-    img.onload = () => {
-      spriteRef.current = img
-      setLoaded(true)
-    }
   }, [])
 
   // Draw + scroll handler
