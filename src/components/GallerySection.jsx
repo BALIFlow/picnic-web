@@ -37,7 +37,7 @@ export default function GallerySection() {
             rel="noopener noreferrer"
             className="break-inside-avoid bg-rust rounded-sm p-8 flex flex-col items-center justify-center text-center min-h-[160px] cursor-pointer hover:bg-rust/80 transition-colors duration-300 block"
           >
-            <span className="text-3xl mb-3">📸</span>
+            <ion-icon name="logo-instagram" style={{ fontSize: '2rem', marginBottom: '0.75rem' }}></ion-icon>
             <p className="font-display font-bold text-cream text-lg mb-1">Síguenos</p>
             <p className="font-body text-cream/80 text-sm">@picnic.laspalmas</p>
           </a>

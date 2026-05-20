@@ -33,9 +33,9 @@ export default function Footer() {
           <div>
             <p className="font-body text-cream/30 text-xs tracking-[0.2em] uppercase mb-5">Encuéntranos</p>
             <div className="space-y-2 mb-6">
-              <p className="font-body font-light text-cream/50 text-sm">📍 Av. Rafael Cabrera, 7 · Las Palmas</p>
-              <p className="font-body font-light text-cream/50 text-sm">📞 +34 828 712 623</p>
-              <p className="font-body font-light text-cream/50 text-sm">📸 @picnic.laspalmas</p>
+              <p className="font-body font-light text-cream/50 text-sm flex items-center gap-2"><ion-icon name="location-outline"></ion-icon> Av. Rafael Cabrera, 7 · Las Palmas</p>
+              <p className="font-body font-light text-cream/50 text-sm flex items-center gap-2"><ion-icon name="call-outline"></ion-icon> +34 828 712 623</p>
+              <p className="font-body font-light text-cream/50 text-sm flex items-center gap-2"><ion-icon name="logo-instagram"></ion-icon> @picnic.laspalmas</p>
             </div>
             <a href="#reservas"
               className="inline-block bg-rust text-cream font-body font-medium text-xs px-5 py-2.5 rounded-full hover:bg-rust/80 active:scale-95 transition-all duration-300">
@@ -50,7 +50,7 @@ export default function Footer() {
             © 2026 Picnic Trattoria Napoletana · Todos los derechos reservados
           </p>
           <p className="font-body font-light text-cream/20 text-xs italic">
-            Hecho con amor y mucho orégano 🌿
+            Hecho con amor y mucho orégano
           </p>
         </div>
       </div>

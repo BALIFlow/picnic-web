@@ -90,7 +90,11 @@ export default function ReservasSection() {
           </p>
 
           <div className="flex flex-col gap-3">
-            {/* AI Call button */}
+            <a href="https://wa.me/34828712623"
+              className="flex items-center gap-3 bg-[#25D366] text-white font-body font-medium text-sm px-6 py-3.5 rounded-full hover:bg-[#20bc5a] active:scale-95 transition-all duration-300 w-fit">
+              <ion-icon name="logo-whatsapp" style={{ fontSize: '1.1rem' }}></ion-icon> Escribir por WhatsApp
+            </a>
+
             <button
               onClick={handleCall}
               disabled={loading}
@@ -100,23 +104,16 @@ export default function ReservasSection() {
                   : 'bg-cream text-dark hover:bg-cream/90'
               } ${loading ? 'opacity-60 cursor-wait' : ''}`}
             >
-              <span className={`text-lg ${callActive ? 'animate-pulse' : ''}`}>
-                {callActive ? '🔴' : '📲'}
-              </span>
-              {loading ? 'Conectando…' : callActive ? 'Colgar llamada' : 'Llamar ahora (IA)'}
+              <ion-icon
+                name={callActive ? 'stop-circle-outline' : 'call-outline'}
+                style={{ fontSize: '1.1rem', animation: callActive ? 'pulse 1s infinite' : 'none' }}
+              ></ion-icon>
+              {loading ? 'Conectando…' : callActive ? 'Colgar llamada' : 'Llamar ahora'}
             </button>
 
-            <a href="https://wa.me/34828712623"
-              className="flex items-center gap-3 bg-[#25D366] text-white font-body font-medium text-sm px-6 py-3.5 rounded-full hover:bg-[#20bc5a] active:scale-95 transition-all duration-300 w-fit">
-              <span className="text-lg">💬</span> Escribir por WhatsApp
-            </a>
-            <a href="tel:+34828712623"
-              className="flex items-center gap-3 border border-cream/30 text-cream font-body font-light text-sm px-6 py-3.5 rounded-full hover:border-cream/60 hover:bg-white/5 active:scale-95 transition-all duration-300 w-fit">
-              <span className="text-lg">📞</span> +34 828 712 623
-            </a>
             <a href="https://maps.google.com"
               className="flex items-center gap-3 border border-cream/30 text-cream font-body font-light text-sm px-6 py-3.5 rounded-full hover:border-cream/60 hover:bg-white/5 active:scale-95 transition-all duration-300 w-fit">
-              <span className="text-lg">📍</span> Cómo llegar
+              <ion-icon name="location-outline" style={{ fontSize: '1.1rem' }}></ion-icon> Cómo llegar
             </a>
           </div>
         </div>
@@ -138,7 +135,7 @@ export default function ReservasSection() {
         </div>
 
         <div className="bg-cream/10 rounded-sm p-5">
-          <p className="font-body font-medium text-cream text-sm mb-1">📍 Encuéntranos</p>
+          <p className="font-body font-medium text-cream text-sm mb-1 flex items-center gap-2"><ion-icon name="location-outline"></ion-icon> Encuéntranos</p>
           <p className="font-body font-light text-cream/70 text-sm">
             Avenida Rafael Cabrera, 7<br />
             35002 Las Palmas de Gran Canaria
