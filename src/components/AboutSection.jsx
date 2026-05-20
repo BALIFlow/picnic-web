@@ -1,9 +1,9 @@
 import useScrollReveal from '../hooks/useScrollReveal'
 
 const pillars = [
-  { icon: '🔥', title: 'Horno de leña', desc: 'Masa napolitana de 48h de fermentación lenta' },
-  { icon: '🌿', title: 'Ingredientes frescos', desc: 'Importados directamente de Italia con cariño' },
-  { icon: '❤️', title: 'Con alma', desc: 'Cada plato hecho con amor y mucho orégano' },
+  { icon: 'flame-outline', title: 'Horno de leña', desc: 'Masa napolitana de 48h de fermentación lenta' },
+  { icon: 'leaf-outline', title: 'Ingredientes frescos', desc: 'Importados directamente de Italia con cariño' },
+  { icon: 'heart-outline', title: 'Con alma', desc: 'Cada plato hecho con amor y mucho orégano' },
 ]
 
 export default function AboutSection() {
@@ -53,7 +53,7 @@ export default function AboutSection() {
           <div className="grid grid-cols-1 gap-6">
             {pillars.map(p => (
               <div key={p.title} className="flex items-start gap-4">
-                <span className="text-2xl shrink-0 mt-0.5">{p.icon}</span>
+                <ion-icon name={p.icon} style={{ fontSize: '1.5rem', color: '#c94a1a', flexShrink: 0, marginTop: '2px' }}></ion-icon>
                 <div>
                   <p className="font-body font-semibold text-dark text-sm mb-1">{p.title}</p>
                   <p className="font-body font-light text-dark/60 text-sm">{p.desc}</p>
