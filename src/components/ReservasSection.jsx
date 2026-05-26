@@ -41,7 +41,8 @@ export default function ReservasSection() {
 
   const getVapi = async () => {
     if (vapiRef.current) return vapiRef.current
-    const { default: Vapi } = await import('@vapi-ai/web')
+    const mod = await import('@vapi-ai/web')
+    const Vapi = mod.default?.default ?? mod.default ?? mod.Vapi ?? mod
     const instance = new Vapi(VAPI_PUBLIC_KEY)
     instance.on('call-start', () => console.log('Llamada iniciada'))
     instance.on('call-end', () => { console.log('Llamada terminada'); setCallActive(false) })
