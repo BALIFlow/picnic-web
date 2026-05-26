@@ -2,7 +2,24 @@ import { useState, useRef } from 'react'
 import useScrollReveal from '../hooks/useScrollReveal'
 
 const VAPI_PUBLIC_KEY = '9a9c7215-0f7c-4d07-b089-6d4b9f6020f6'
-const VAPI_ASSISTANT_ID = '6c92f776-abb2-4175-8a55-45d76ec01d1a'
+
+// Asistentes Vapi por tenant. Para probar otro agente: ?tenant=oraz en la URL,
+// o usa el selector que aparece sólo en modo prueba.
+const TENANTS = {
+  picnic: { label: 'Picnic', assistantId: '6c92f776-abb2-4175-8a55-45d76ec01d1a' },
+  oraz: { label: 'oraz', assistantId: 'fd14e9ef-adc8-4392-9823-573070829c39' },
+}
+const DEFAULT_TENANT = 'picnic'
+
+// El selector de tenant es sólo una herramienta de prueba: aparece si la URL
+// trae ?tenant=... o ?test=1. En producción normal el botón llama a Picnic.
+function readTenantFromUrl() {
+  if (typeof window === 'undefined') return { tenant: DEFAULT_TENANT, showPicker: false }
+  const p = new URLSearchParams(window.location.search)
+  const t = (p.get('tenant') || '').toLowerCase()
+  const showPicker = p.has('tenant') || p.get('test') === '1'
+  return { tenant: TENANTS[t] ? t : DEFAULT_TENANT, showPicker }
+}
 
 function getVariables() {
   const fmt = (d) =>
@@ -38,6 +55,7 @@ export default function ReservasSection() {
   const [callActive, setCallActive] = useState(false)
   const [loading, setLoading] = useState(false)
   const vapiRef = useRef(null)
+  const [{ tenant, showPicker }, setTenantState] = useState(readTenantFromUrl)
 
   const getVapi = async () => {
     if (vapiRef.current) return vapiRef.current
@@ -60,7 +78,8 @@ export default function ReservasSection() {
     setLoading(true)
     try {
       const v = await getVapi()
-      await v.start(VAPI_ASSISTANT_ID, { variableValues: getVariables() })
+      const assistantId = TENANTS[tenant]?.assistantId ?? TENANTS[DEFAULT_TENANT].assistantId
+      await v.start(assistantId, { variableValues: getVariables() })
       setCallActive(true)
     } catch (e) {
       console.error('Vapi start error:', e)
@@ -97,6 +116,22 @@ export default function ReservasSection() {
               <ion-icon name="logo-whatsapp" style={{ fontSize: '1.1rem' }}></ion-icon> Escribir por WhatsApp
             </a>
 
+            {showPicker && (
+              <label className="flex items-center gap-2 text-cream/70 font-body text-xs">
+                <span className="uppercase tracking-[0.2em]">Prueba — agente:</span>
+                <select
+                  value={tenant}
+                  disabled={callActive || loading}
+                  onChange={(e) => setTenantState((s) => ({ ...s, tenant: e.target.value }))}
+                  className="bg-dark/60 border border-cream/30 text-cream rounded-full px-3 py-1.5 font-body text-xs focus:outline-none focus:border-cream/60 disabled:opacity-50"
+                >
+                  {Object.entries(TENANTS).map(([key, t]) => (
+                    <option key={key} value={key} className="text-dark">{t.label}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+
             <button
               onClick={handleCall}
               disabled={loading}
@@ -110,7 +145,13 @@ export default function ReservasSection() {
                 name={callActive ? 'stop-circle-outline' : 'call-outline'}
                 style={{ fontSize: '1.1rem', animation: callActive ? 'pulse 1s infinite' : 'none' }}
               ></ion-icon>
-              {loading ? 'Conectando…' : callActive ? 'Colgar llamada' : 'Llamar ahora'}
+              {loading
+                ? 'Conectando…'
+                : callActive
+                ? 'Colgar llamada'
+                : showPicker
+                ? `Llamar — ${TENANTS[tenant]?.label ?? ''}`
+                : 'Llamar ahora'}
             </button>
 
             <a href="https://maps.google.com"
