@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import useScrollReveal from '../hooks/useScrollReveal'
 
 const photos = [
@@ -14,8 +14,25 @@ const photos = [
 ]
 
 export default function GallerySection() {
-  const [lightbox, setLightbox] = useState(null)
+  const [lightboxIdx, setLightboxIdx] = useState(null)
   const headRef = useScrollReveal()
+
+  const close = useCallback(() => setLightboxIdx(null), [])
+  const prev = useCallback(() => setLightboxIdx(i => (i - 1 + photos.length) % photos.length), [])
+  const next = useCallback(() => setLightboxIdx(i => (i + 1) % photos.length), [])
+
+  useEffect(() => {
+    if (lightboxIdx === null) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') close()
+      if (e.key === 'ArrowLeft') prev()
+      if (e.key === 'ArrowRight') next()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightboxIdx, close, prev, next])
+
+  const lightbox = lightboxIdx !== null ? photos[lightboxIdx] : null
 
   return (
     <section id="galería" className="bg-black py-24 md:py-32 px-5 md:px-8">
@@ -28,7 +45,7 @@ export default function GallerySection() {
         {/* Masonry grid */}
         <div className="columns-2 md:columns-3 gap-3 space-y-3">
           {photos.map((photo, i) => (
-            <GalleryItem key={i} photo={photo} index={i} onClick={() => setLightbox(photo)} />
+            <GalleryItem key={i} photo={photo} index={i} onClick={() => setLightboxIdx(i)} />
           ))}
           {/* Instagram CTA card */}
           <a
@@ -47,22 +64,35 @@ export default function GallerySection() {
       {/* Lightbox */}
       {lightbox && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 md:p-8"
-          onClick={() => setLightbox(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+          style={{ backdropFilter: 'blur(24px) saturate(0.7)', background: 'rgba(0,0,0,0.85)' }}
+          onClick={close}
         >
           <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
             <img
+              key={lightboxIdx}
               src={lightbox.src}
               alt={lightbox.alt}
               className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl"
+              style={{ animation: 'lightboxIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards' }}
               onClick={e => e.stopPropagation()}
             />
             <button
-              className="absolute top-0 right-0 -translate-y-full mb-2 text-cream/50 hover:text-cream text-2xl transition-colors p-2"
-              onClick={() => setLightbox(null)}
-            >
-              ✕
-            </button>
+              className="absolute top-0 right-0 -translate-y-full text-cream/50 hover:text-cream text-2xl transition-colors p-2"
+              onClick={close}
+            >✕</button>
+            {photos.length > 1 && (
+              <>
+                <button onClick={e => { e.stopPropagation(); prev() }}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-cream/50 hover:text-cream text-3xl transition-colors p-2 hidden md:block">
+                  ‹
+                </button>
+                <button onClick={e => { e.stopPropagation(); next() }}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-cream/50 hover:text-cream text-3xl transition-colors p-2 hidden md:block">
+                  ›
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

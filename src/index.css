@@ -16,4 +16,9 @@
   .reveal.visible { opacity: 1; transform: translate(0); }
 
   .parallax-bg { background-attachment: fixed; background-size: cover; background-position: center; }
+
+  @keyframes lightboxIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
 }

@@ -113,6 +113,7 @@ export default function ReservasSection() {
             <a href="https://wa.me/14155238886?text=Hola%2C%20quiero%20reservar"
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 bg-[#25D366] text-white font-body font-medium text-sm px-6 py-3.5 rounded-full hover:bg-[#20bc5a] active:scale-95 transition-all duration-300 w-fit">
+              <span className="w-2 h-2 rounded-full bg-white/90 animate-pulse flex-shrink-0" />
               <ion-icon name="logo-whatsapp" style={{ fontSize: '1.1rem' }}></ion-icon> Escribir por WhatsApp
             </a>
 

@@ -68,7 +68,7 @@ export default function SpecialtiesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06]">
           {dishes.map((d, i) => (
             <DishCard key={d.name} dish={d} delay={i * 80} />
           ))}
@@ -81,7 +81,7 @@ export default function SpecialtiesSection() {
 function DishCard({ dish, delay }) {
   const ref = useScrollReveal()
   return (
-    <div ref={ref} className="reveal bg-dark group relative overflow-hidden cursor-default"
+    <div ref={ref} className="reveal bg-[#0f0f0f] border border-white/[0.06] group relative overflow-hidden cursor-default"
       style={{ transitionDelay: `${delay}ms` }}>
 
       {/* Image */}
@@ -93,20 +93,21 @@ function DishCard({ dish, delay }) {
         />
       </div>
 
-      {/* Hover rust overlay */}
-      <div className="absolute inset-0 bg-rust/0 group-hover:bg-rust/5 transition-colors duration-500 pointer-events-none" />
+      {/* Hover gradient overlay */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: 'linear-gradient(135deg, #0f0f0f 0%, rgba(201,74,26,0.08) 100%)' }} />
 
       <div className="p-6 relative z-10 group-hover:-translate-y-0.5 transition-transform duration-500">
         <div className="flex items-start justify-between mb-3">
           <h3 className="font-display font-bold text-cream text-xl group-hover:text-rust transition-colors duration-300">
             {dish.name}
           </h3>
-          <span className="font-body text-xs text-rust bg-rust/10 px-2.5 py-1 rounded-full tracking-wide shrink-0 ml-2">
+          <span className="font-body text-xs text-rust/70 border border-rust/30 px-2.5 py-1 rounded-full tracking-wide shrink-0 ml-2">
             {dish.badge}
           </span>
         </div>
         <p className="font-body font-light text-cream/50 text-sm leading-relaxed mb-4">{dish.desc}</p>
-        <p className="font-body font-semibold text-rust text-lg">{dish.price}</p>
+        <p className="font-body font-semibold text-rust text-2xl">{dish.price}</p>
       </div>
 
       {/* Bottom accent line */}

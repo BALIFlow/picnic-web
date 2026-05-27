@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 export const HERO_HEIGHT_VH = 800
 
-// Sprite sheet: 90 frames arranged in a 9x10 grid, each frame 640x360
-const SPRITE_SRC = '/assets/frames.jpg'
-const TOTAL_FRAMES = 90
-const COLS = 9
+// All 919 frames — full sequence from dough to finished pizza
+const FIRST_FRAME = 1
+const LAST_FRAME = 919
+const TOTAL_FRAMES = 919
 const FRAME_W = 1280
 const FRAME_H = 720
 
-// Clip boundaries as fraction of total (durations: 4.06, 5.06, 5.06, 7.06, 5.06, 7.06 = 33.36s)
-const CLIP_BOUNDARIES = [0, 4.06, 9.12, 14.18, 21.24, 26.30, 33.36].map(t => t / 33.36)
+// 8 boundaries → 7 gaps, one phrase per clip
+const CLIP_BOUNDARIES = [1, 97, 218, 339, 460, 629, 750, 919].map(n => (n - 1) / 918)
 const PHRASES = [
   { line1: 'Todo empieza',             line2: 'con la masa.' },
   { line1: 'Harina, agua y',           line2: 'un poco de cariño.' },
@@ -28,70 +28,92 @@ const PHRASES = [
 export default function HeroSection({ onProgressChange }) {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
-  const spriteRef = useRef(null)
+  const framesRef = useRef([])
   const rafRef = useRef(null)
-  const [loaded, setLoaded] = useState(false)
+  const lastFrameRef = useRef(-1)
+  const [loadedCount, setLoadedCount] = useState(0)
+  const [totalToLoad] = useState(TOTAL_FRAMES)
+  const [allLoaded, setAllLoaded] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [inHero, setInHero] = useState(true)
 
-  // Load sprite sheet once
+  // Preload all frames
   useEffect(() => {
-    const img = new Image()
-    img.onload = () => { spriteRef.current = img; setLoaded(true) }
-    img.onerror = () => { console.error('Failed to load sprite sheet:', SPRITE_SRC) }
-    img.src = SPRITE_SRC
-  }, [])
+    let cancelled = false
+    let loaded = 0
+    const count = LAST_FRAME - FIRST_FRAME + 1
+    const images = new Array(count)
+    framesRef.current = images
 
-  // Draw + scroll handler
-  useEffect(() => {
-    if (!loaded) return
-
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-
-    const drawFrame = (frameIdx) => {
-      const sprite = spriteRef.current
-      if (!sprite) return
-      const col = frameIdx % COLS
-      const row = Math.floor(frameIdx / COLS)
-      const sx = col * FRAME_W
-      const sy = row * FRAME_H
-
-      // Black background
-      ctx.fillStyle = '#000'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // Full-bleed on mobile, inset on desktop
-      const isMobile = canvas.width < 768
-      const maxW = isMobile ? canvas.width : canvas.width * 0.78
-      const maxH = isMobile ? canvas.height : canvas.height * 0.78
-      const scale = Math.min(maxW / FRAME_W, maxH / FRAME_H)
-      const dw = FRAME_W * scale
-      const dh = FRAME_H * scale
-      const dx = (canvas.width - dw) / 2
-      const dy = (canvas.height - dh) / 2
-
-      ctx.save()
-      roundRect(ctx, dx, dy, dw, dh, isMobile ? 0 : 12)
-      ctx.clip()
-      ctx.drawImage(sprite, sx, sy, FRAME_W, FRAME_H, dx, dy, dw, dh)
-      ctx.restore()
-
-      // Vignette
-      const grad = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, Math.min(dw, dh) * 0.3,
-        canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) * 0.65
-      )
-      grad.addColorStop(0, 'rgba(0,0,0,0)')
-      grad.addColorStop(1, 'rgba(0,0,0,0.85)')
-      ctx.fillStyle = grad
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    const loadBatch = (start, batchSize) => {
+      if (cancelled) return
+      for (let i = start; i < Math.min(start + batchSize, count); i++) {
+        const idx = i
+        const img = new Image()
+        img.onload = () => {
+          if (cancelled) return
+          images[idx] = img
+          loaded++
+          setLoadedCount(loaded)
+          if (loaded === count) setAllLoaded(true)
+        }
+        img.onerror = () => {
+          if (cancelled) return
+          loaded++
+          setLoadedCount(loaded)
+          if (loaded === count) setAllLoaded(true)
+        }
+        const n = String(idx + 1).padStart(4, '0')
+        img.src = `/assets/frames/frame_${n}.webp`
+      }
     }
 
+    // Load first 30 frames eagerly for fast first paint, then the rest
+    loadBatch(0, 30)
+    const timer = setTimeout(() => loadBatch(30, count - 30), 50)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [])
+
+  const drawFrame = useCallback((frameIdx, canvas) => {
+    const img = framesRef.current[frameIdx]
+    if (!img || !canvas) return
+    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
+
+    // Full-bleed: cover the entire canvas, crop to fill
+    const scale = Math.max(canvas.width / FRAME_W, canvas.height / FRAME_H)
+    const dw = FRAME_W * scale
+    const dh = FRAME_H * scale
+    const dx = (canvas.width - dw) / 2
+    const dy = (canvas.height - dh) / 2
+
+    ctx.drawImage(img, 0, 0, FRAME_W, FRAME_H, dx, dy, dw, dh)
+
+    // Vignette
+    const grad = ctx.createRadialGradient(
+      canvas.width / 2, canvas.height / 2, Math.min(dw, dh) * 0.3,
+      canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) * 0.65
+    )
+    grad.addColorStop(0, 'rgba(0,0,0,0)')
+    grad.addColorStop(1, 'rgba(0,0,0,0.85)')
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }, [])
+
+  // Resize + scroll
+  useEffect(() => {
+    if (!allLoaded) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+
     const setSize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      drawFrame(Math.floor(scrollProgress * (TOTAL_FRAMES - 1)))
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
+      const fi = Math.floor(scrollProgress * (TOTAL_FRAMES - 1))
+      drawFrame(fi, canvas)
     }
     setSize()
     window.addEventListener('resize', setSize)
@@ -106,40 +128,48 @@ export default function HeroSection({ onProgressChange }) {
         const scrolled = window.scrollY - containerTop
         const totalScroll = container.offsetHeight - window.innerHeight
         const p = Math.max(0, Math.min(1, scrolled / totalScroll))
-        // Stay "in hero" until spacer is fully above the viewport
         setInHero(rect.bottom > -window.innerHeight * 0.1)
         setScrollProgress(p)
         onProgressChange?.(p)
-        drawFrame(Math.floor(p * (TOTAL_FRAMES - 1)))
+        const fi = Math.floor(p * (TOTAL_FRAMES - 1))
+        if (fi !== lastFrameRef.current) {
+          lastFrameRef.current = fi
+          drawFrame(fi, canvas)
+        }
       })
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    drawFrame(0)
+    drawFrame(0, canvas)
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', setSize)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [loaded, onProgressChange])
+  }, [allLoaded, drawFrame, onProgressChange])
 
   const showHero = scrollProgress >= 0.93
+  const loadPercent = Math.round((loadedCount / totalToLoad) * 100)
 
   return (
     <>
-      {/* Loading screen — shows while sprite downloads */}
-      {!loaded && (
+      {/* Loading screen */}
+      {!allLoaded && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 999, background: '#000',
           display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: '24px'
+          alignItems: 'center', justifyContent: 'center', gap: '24px',
         }}>
           <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 900, color: '#f7f3ed', fontSize: '2.5rem', letterSpacing: '0.25em' }}>PICNIC</p>
-          <div style={{ width: '200px', height: '2px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: '#c94a1a', width: '100%', animation: 'pulse 1.5s ease-in-out infinite', opacity: 0.6 }} />
+          <div style={{ width: '200px', height: '2px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', background: '#c94a1a',
+              width: `${loadPercent}%`,
+              transition: 'width 0.3s ease',
+            }} />
           </div>
           <p style={{ fontFamily: 'Inter, sans-serif', color: 'rgba(247,243,237,0.3)', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-            Cargando…
+            {loadPercent < 100 ? `${loadPercent}%` : 'Listo…'}
           </p>
         </div>
       )}
@@ -148,35 +178,79 @@ export default function HeroSection({ onProgressChange }) {
       <div ref={containerRef} id="inicio" style={{ height: `${HERO_HEIGHT_VH}vh` }} />
 
       {/* Fixed canvas layer */}
-      {loaded && (
+      {allLoaded && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           zIndex: inHero ? 10 : -1,
           opacity: inHero ? 1 : 0,
-          transition: 'opacity 1.2s cubic-bezier(0.4,0,0.2,1), zIndex 0s 1.2s',
+          transition: 'opacity 1.2s cubic-bezier(0.4,0,0.2,1)',
           background: '#000',
           pointerEvents: 'none',
         }}>
-          <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
+          <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, display: 'block' }} />
 
-          {/* Phrase overlays */}
+          {/* Vertical rust progress bar on left edge */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: '2px',
+            background: 'rgba(201,74,26,0.7)', zIndex: 20,
+            height: `${scrollProgress * 100}%`,
+            transition: 'height 0.05s linear',
+          }} />
+
+          {/* Big PICNIC title + intro subtitle — fades out as scroll begins */}
+          <div style={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center', pointerEvents: 'none',
+            opacity: scrollProgress < 0.08 ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+          }}>
+            <p style={{
+              fontFamily: '"Playfair Display", serif', fontWeight: 900,
+              fontSize: 'clamp(5rem, 18vw, 16rem)',
+              color: '#f7f3ed',
+              letterSpacing: '0.08em',
+              lineHeight: 1,
+              textShadow: '0 4px 60px rgba(0,0,0,0.4)',
+            }}>PICNIC</p>
+            <p style={{
+              fontFamily: '"Playfair Display", serif', fontStyle: 'italic',
+              fontWeight: 400, fontSize: 'clamp(1.2rem, 2.2vw, 1.9rem)',
+              color: '#c94a1a',
+              letterSpacing: '0.08em',
+              marginTop: '0.75rem',
+            }}>Una pizza napolitana empieza aquí</p>
+          </div>
+
+          {/* Phrases — alternating left/right, slide up from below */}
           {PHRASES.map((phrase, i) => {
             const isActive = scrollProgress >= phrase.from && scrollProgress <= phrase.to
+            const side = i % 2 === 0 ? 'left' : 'right'
             return (
               <div key={i} style={{
-                position: 'absolute', bottom: '12%', left: '50%',
-                transform: 'translateX(-50%)', textAlign: 'center',
-                opacity: isActive ? 1 : 0, transition: 'opacity 0.6s ease',
-                pointerEvents: 'none', whiteSpace: 'nowrap',
+                position: 'absolute',
+                bottom: '10%',
+                [side]: '5%',
+                textAlign: side,
+                pointerEvents: 'none',
+                overflow: 'hidden',
+                maxWidth: '38%',
               }}>
-                <p style={{
-                  fontFamily: '"Playfair Display", serif', fontStyle: 'italic',
-                  fontWeight: 400, fontSize: 'clamp(1.4rem, 3.5vw, 2.6rem)',
-                  color: 'rgba(247,243,237,0.95)', lineHeight: 1.3,
-                  textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+                <div style={{
+                  transform: isActive ? 'translateY(0)' : 'translateY(100%)',
+                  opacity: isActive ? 1 : 0,
+                  transition: 'transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease',
                 }}>
-                  {phrase.line1}{phrase.line2 && <><br />{phrase.line2}</>}
-                </p>
+                  <p style={{
+                    fontFamily: '"Playfair Display", serif', fontStyle: 'italic',
+                    fontWeight: 400, fontSize: 'clamp(1.1rem, 2.8vw, 2.2rem)',
+                    color: 'rgba(247,243,237,0.92)', lineHeight: 1.25,
+                    textShadow: '0 2px 24px rgba(0,0,0,0.9)',
+                  }}>
+                    {phrase.line1}
+                    {phrase.line2 && <><br />{phrase.line2}</>}
+                  </p>
+                </div>
               </div>
             )
           })}
@@ -214,6 +288,28 @@ export default function HeroSection({ onProgressChange }) {
             </div>
           </div>
 
+          {/* Floating reservation pill — appears after first scroll */}
+          <a href="#reservas" style={{
+            position: 'absolute', top: '24px', right: '24px',
+            opacity: scrollProgress > 0.05 && !showHero ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+            pointerEvents: scrollProgress > 0.05 && !showHero ? 'auto' : 'none',
+            background: 'rgba(201,74,26,0.85)',
+            backdropFilter: 'blur(8px)',
+            color: '#f7f3ed',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '12px',
+            fontWeight: 500,
+            letterSpacing: '0.05em',
+            padding: '10px 20px',
+            borderRadius: '999px',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            zIndex: 30,
+          }}>
+            Reservar mesa →
+          </a>
+
           {/* Scroll indicator */}
           <div style={{
             position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
@@ -224,29 +320,8 @@ export default function HeroSection({ onProgressChange }) {
             <span className="font-body text-cream/50 text-[10px] tracking-[0.3em] uppercase">Scroll</span>
             <div className="w-px h-12 bg-gradient-to-b from-cream/50 to-transparent animate-pulse" />
           </div>
-
-          {/* Progress bar */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, height: '2px',
-            background: 'rgba(201,74,26,0.7)', zIndex: 20,
-            width: `${scrollProgress * 100}%`,
-          }} />
         </div>
       )}
     </>
   )
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath()
-  ctx.moveTo(x + r, y)
-  ctx.lineTo(x + w - r, y)
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
-  ctx.lineTo(x + w, y + h - r)
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
-  ctx.lineTo(x + r, y + h)
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
-  ctx.lineTo(x, y + r)
-  ctx.quadraticCurveTo(x, y, x + r, y)
-  ctx.closePath()
 }
