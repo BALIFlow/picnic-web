@@ -56,7 +56,7 @@ export default function GallerySection() {
           >
             <ion-icon name="logo-instagram" style={{ fontSize: '2rem', marginBottom: '0.75rem' }}></ion-icon>
             <p className="font-display font-bold text-cream text-lg mb-1">Síguenos</p>
-            <p className="font-body text-cream/80 text-sm">@picnic.laspalmas</p>
+            <p className="font-body text-cream text-sm">@picnic.laspalmas</p>
           </a>
         </div>
       </div>
@@ -78,17 +78,17 @@ export default function GallerySection() {
               onClick={e => e.stopPropagation()}
             />
             <button
-              className="absolute top-0 right-0 -translate-y-full text-cream/50 hover:text-cream text-2xl transition-colors p-2"
+              className="absolute top-0 right-0 -translate-y-full text-cream hover:text-cream text-2xl transition-colors p-2"
               onClick={close}
             >✕</button>
             {photos.length > 1 && (
               <>
                 <button onClick={e => { e.stopPropagation(); prev() }}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-cream/50 hover:text-cream text-3xl transition-colors p-2 hidden md:block">
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-cream hover:text-cream text-3xl transition-colors p-2 hidden md:block">
                   ‹
                 </button>
                 <button onClick={e => { e.stopPropagation(); next() }}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-cream/50 hover:text-cream text-3xl transition-colors p-2 hidden md:block">
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-cream hover:text-cream text-3xl transition-colors p-2 hidden md:block">
                   ›
                 </button>
               </>

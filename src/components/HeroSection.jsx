@@ -239,17 +239,17 @@ export default function HeroSection({ onProgressChange }) {
             pointerEvents: showHero ? 'auto' : 'none',
             background: showHero ? 'rgba(0,0,0,0.45)' : 'transparent',
           }}>
-            <p className="font-body text-cream/60 text-xs tracking-[0.4em] uppercase mb-6">
+            <p className="font-body text-cream text-xs tracking-[0.4em] uppercase mb-6">
               {t.hero.tagline}
             </p>
             <h1 className="font-display font-black text-cream text-5xl md:text-7xl lg:text-8xl leading-tight mb-2">
               {t.hero.title}
             </h1>
-            <h2 className="font-display font-black italic text-cream/90 text-4xl md:text-6xl lg:text-7xl leading-tight mb-8">
+            <h2 className="font-display font-black italic text-cream text-4xl md:text-6xl lg:text-7xl leading-tight mb-8">
               {t.hero.subtitle}
             </h2>
             <div className="w-16 h-px bg-rust mx-auto mb-6" />
-            <p className="font-body font-light text-cream/70 text-base md:text-lg tracking-widest mb-10">
+            <p className="font-body font-light text-cream text-base md:text-lg tracking-widest mb-10">
               {t.hero.divider}
             </p>
             <div className="flex flex-col sm:flex-row gap-4" style={{ pointerEvents: 'auto' }}>
@@ -315,7 +315,7 @@ export default function HeroSection({ onProgressChange }) {
             opacity: scrollProgress < 0.03 ? 1 : 0, transition: 'opacity 0.4s ease',
             pointerEvents: 'none', zIndex: 20,
           }}>
-            <span className="font-body text-cream/50 text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+            <span className="font-body text-cream text-[10px] tracking-[0.3em] uppercase">Scroll</span>
             <div className="w-px h-12 bg-gradient-to-b from-cream/50 to-transparent animate-pulse" />
           </div>
         </div>

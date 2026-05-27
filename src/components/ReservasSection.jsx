@@ -86,7 +86,7 @@ export default function ReservasSection() {
             {r.title}<br />
             <span className="italic font-normal">{r.titleItalic}</span>
           </h2>
-          <p className="font-body font-light text-cream/60 text-base leading-relaxed mb-10 max-w-sm">{r.body}</p>
+          <p className="font-body font-light text-cream text-base leading-relaxed mb-10 max-w-sm">{r.body}</p>
 
           <div className="flex flex-col gap-3">
             <a href="https://wa.me/14155238886?text=Hola%2C%20quiero%20reservar"
@@ -98,7 +98,7 @@ export default function ReservasSection() {
             </a>
 
             {showPicker && (
-              <label className="flex items-center gap-2 text-cream/70 font-body text-xs">
+              <label className="flex items-center gap-2 text-cream font-body text-xs">
                 <span className="uppercase tracking-[0.2em]">Prueba — agente:</span>
                 <select
                   value={tenant}
@@ -137,7 +137,7 @@ export default function ReservasSection() {
       </div>
 
       <div ref={rightRef} className="reveal from-right bg-rust px-8 md:px-16 py-20 flex flex-col justify-center">
-        <p className="font-body text-cream/60 text-xs tracking-[0.3em] uppercase mb-8">{r.hoursLabel}</p>
+        <p className="font-body text-cream text-xs tracking-[0.3em] uppercase mb-8">{r.hoursLabel}</p>
 
         <div className="space-y-4 mb-10">
           {r.hours.map(h => (
@@ -154,8 +154,8 @@ export default function ReservasSection() {
           <p className="font-body font-medium text-cream text-sm mb-1 flex items-center gap-2">
             <ion-icon name="location-outline"></ion-icon> {r.findUs}
           </p>
-          <p className="font-body font-light text-cream/70 text-sm whitespace-pre-line">{r.address}</p>
-          <p className="font-body text-cream/50 text-xs mt-2 italic">{r.nearTriana}</p>
+          <p className="font-body font-light text-cream text-sm whitespace-pre-line">{r.address}</p>
+          <p className="font-body text-cream text-xs mt-2 italic">{r.nearTriana}</p>
         </div>
       </div>
     </section>

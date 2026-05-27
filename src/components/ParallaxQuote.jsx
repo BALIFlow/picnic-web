@@ -43,7 +43,7 @@ export default function ParallaxQuote() {
             <span key={i}>{line}{i < lines.length - 1 && <br />}</span>
           ))}
         </blockquote>
-        <cite className="font-body font-light text-cream/50 text-sm tracking-[0.3em] uppercase not-italic">
+        <cite className="font-body font-light text-cream text-sm tracking-[0.3em] uppercase not-italic">
           — Picnic Trattoria Napoletana
         </cite>
         <div className="w-px h-16 bg-rust/60 mx-auto mt-8" />

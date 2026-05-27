@@ -30,7 +30,7 @@ export default function Navbar({ heroProgress = 0 }) {
         <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex flex-col leading-none">
             <span className="font-display font-black text-cream text-xl tracking-tight">PICNIC</span>
-            <span className="font-body text-cream/60 text-[9px] tracking-[0.25em] uppercase">Trattoria Napoletana</span>
+            <span className="font-body text-cream text-[9px] tracking-[0.25em] uppercase">Trattoria Napoletana</span>
           </a>
 
           <ul className="hidden md:flex items-center gap-8">
@@ -38,7 +38,7 @@ export default function Navbar({ heroProgress = 0 }) {
               <li key={l}>
                 <a
                   href={`#${anchors[i]}`}
-                  className="font-body text-cream/80 text-sm tracking-wide hover:text-cream transition-colors duration-300 relative group"
+                  className="font-body text-cream text-sm tracking-wide hover:text-cream transition-colors duration-300 relative group"
                 >
                   {l}
                   <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-rust transition-all duration-300 group-hover:w-full" />
@@ -51,7 +51,7 @@ export default function Navbar({ heroProgress = 0 }) {
             {/* Language toggle */}
             <button
               onClick={toggle}
-              className="font-body text-xs font-medium tracking-[0.12em] uppercase text-cream/60 hover:text-cream transition-colors duration-300 border border-cream/20 hover:border-cream/50 rounded-full px-3 py-1.5"
+              className="font-body text-xs font-medium tracking-[0.12em] uppercase text-cream hover:text-cream transition-colors duration-300 border border-cream/20 hover:border-cream/50 rounded-full px-3 py-1.5"
               aria-label="Switch language"
             >
               {lang === 'es' ? 'IT' : 'ES'}
@@ -96,7 +96,7 @@ export default function Navbar({ heroProgress = 0 }) {
           </a>
           <button
             onClick={() => { toggle(); setOpen(false) }}
-            className="font-body text-sm text-cream/50 hover:text-cream tracking-widest uppercase border border-cream/20 rounded-full px-5 py-2 transition-colors duration-300"
+            className="font-body text-sm text-cream hover:text-cream tracking-widest uppercase border border-cream/20 rounded-full px-5 py-2 transition-colors duration-300"
           >
             {lang === 'es' ? 'Italiano' : 'Español'}
           </button>

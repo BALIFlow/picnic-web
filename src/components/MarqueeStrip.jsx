@@ -9,7 +9,7 @@ export default function MarqueeStrip() {
     <div className="bg-dark border-y border-white/5 py-3 overflow-hidden">
       <div className="flex whitespace-nowrap animate-marquee">
         {items.map((item, i) => (
-          <span key={i} className="font-body text-xs text-cream/50 tracking-widest uppercase mx-8 shrink-0 flex items-center gap-1">
+          <span key={i} className="font-body text-xs text-cream tracking-widest uppercase mx-8 shrink-0 flex items-center gap-1">
             {i % base.length === 0
               ? <><span className="text-rust">✦</span> {item}</>
               : item}

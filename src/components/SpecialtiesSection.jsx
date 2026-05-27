@@ -22,9 +22,9 @@ export default function SpecialtiesSection() {
           <p className="font-body text-rust text-xs tracking-[0.3em] uppercase mb-4">{label}</p>
           <h2 className="font-display font-bold text-cream text-4xl md:text-5xl leading-tight mb-4">
             {title}<br />
-            <span className="italic font-normal text-cream/70">{titleItalic}</span>
+            <span className="italic font-normal text-cream">{titleItalic}</span>
           </h2>
-          <p className="font-body font-light text-cream/50 text-sm tracking-wide">{subtitle}</p>
+          <p className="font-body font-light text-cream text-sm tracking-wide">{subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06]">
@@ -55,7 +55,7 @@ function DishCard({ dish, delay }) {
           <h3 className="font-display font-bold text-cream text-xl group-hover:text-rust transition-colors duration-300">{dish.name}</h3>
           <span className="font-body text-xs text-rust/70 border border-rust/30 px-2.5 py-1 rounded-full tracking-wide shrink-0 ml-2">{dish.badge}</span>
         </div>
-        <p className="font-body font-light text-cream/50 text-sm leading-relaxed mb-4">{dish.desc}</p>
+        <p className="font-body font-light text-cream text-sm leading-relaxed mb-4">{dish.desc}</p>
         <p className="font-body font-semibold text-rust text-2xl">{dish.price}</p>
       </div>
 
