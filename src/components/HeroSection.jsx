@@ -292,12 +292,19 @@ export default function HeroSection({ onProgressChange }) {
             opacity: scrollProgress > 0.05 && !showHero ? 1 : 0,
             transition: 'opacity 0.5s ease',
             pointerEvents: scrollProgress > 0.05 && !showHero ? 'auto' : 'none',
-            background: 'rgba(201,74,26,0.85)', backdropFilter: 'blur(8px)',
+            background: '#c94a1a', backdropFilter: 'blur(8px)',
             color: '#f7f3ed', fontFamily: 'Inter, sans-serif',
-            fontSize: '12px', fontWeight: 500, letterSpacing: '0.05em',
-            padding: '10px 24px', borderRadius: '999px',
+            fontSize: '13px', fontWeight: 500, letterSpacing: '0.04em',
+            padding: '11px 22px', borderRadius: '999px',
             textDecoration: 'none', whiteSpace: 'nowrap',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            boxShadow: '0 4px 24px rgba(201,74,26,0.35)',
           }}>
+            <span style={{
+              width: '8px', height: '8px', borderRadius: '50%',
+              background: '#25D366', flexShrink: 0,
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }} />
             {t.hero.pill}
           </a>
 
