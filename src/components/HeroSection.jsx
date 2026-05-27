@@ -12,17 +12,18 @@ const FRAME_H = 540
 // 8 boundaries → 7 clips, one phrase per clip
 const CLIP_BOUNDARIES = [1, 49, 110, 171, 232, 317, 378, 463].map(n => (n - 1) / 462)
 const PHRASES = [
-  { line1: 'Todo empieza',             line2: 'con la masa.' },
-  { line1: 'Harina, agua y',           line2: 'un poco de cariño.' },
-  { line1: 'El toque secreto:',        line2: 'Nuestra salsa de Nápoles.' },
-  { line1: 'Ingredientes frescos y',   line2: 'de primera calidad.' },
-  { line1: 'El fuego',                 line2: 'hace la magia.' },
-  { line1: 'Lista.',                   line2: 'Te está esperando.' },
+  { line1: 'Todo empieza',           line2: 'con la masa.' },
+  { line1: 'Amasada a mano,',        line2: 'con cariño.' },
+  { line1: 'Nuestra salsa',          line2: 'de Nápoles.' },
+  { line1: 'El toque secreto:',      line2: 'mozzarella fresca.' },
+  { line1: 'Ingredientes frescos',   line2: 'y de primera calidad.' },
+  { line1: 'El fuego',               line2: 'hace la magia.' },
+  { line1: 'Lista.',                 line2: 'Te está esperando.' },
 ].map((text, i) => {
   const start = CLIP_BOUNDARIES[i]
   const end = CLIP_BOUNDARIES[i + 1]
   const span = end - start
-  return { ...text, from: start + span * 0.15, to: end - span * 0.15 }
+  return { ...text, from: start + span * 0.2, to: end - span * 0.2 }
 })
 
 export default function HeroSection({ onProgressChange }) {
