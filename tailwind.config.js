@@ -29,7 +29,7 @@ export default {
         },
       },
       animation: {
-        marquee: 'marquee 20s linear infinite',
+        marquee: 'marquee 40s linear infinite',
         fadeUp: 'fadeUp 1.2s ease-out forwards',
         fadeIn: 'fadeIn 1.2s ease-out forwards',
       },

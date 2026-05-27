@@ -128,7 +128,7 @@ export default function HeroSection({ onProgressChange }) {
         const scrolled = window.scrollY - containerTop
         const totalScroll = container.offsetHeight - window.innerHeight
         const p = Math.max(0, Math.min(1, scrolled / totalScroll))
-        setInHero(rect.bottom > -window.innerHeight * 0.1)
+        setInHero(rect.bottom > window.innerHeight)
         setScrollProgress(p)
         onProgressChange?.(p)
         const fi = Math.floor(p * (TOTAL_FRAMES - 1))
@@ -183,7 +183,7 @@ export default function HeroSection({ onProgressChange }) {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           zIndex: inHero ? 10 : -1,
           opacity: inHero ? 1 : 0,
-          transition: 'opacity 1.2s cubic-bezier(0.4,0,0.2,1)',
+          transition: 'opacity 0.4s ease',
           background: '#000',
           pointerEvents: 'none',
         }}>
