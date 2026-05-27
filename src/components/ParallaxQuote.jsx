@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import useScrollReveal from '../hooks/useScrollReveal'
+import { useLang } from '../i18n'
 
 export default function ParallaxQuote() {
+  const { t } = useLang()
   const ref = useScrollReveal()
   const sectionRef = useRef(null)
   const [offset, setOffset] = useState(0)
@@ -15,6 +17,8 @@ export default function ParallaxQuote() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const lines = t.quote.split('\n')
 
   return (
     <section ref={sectionRef} className="relative py-32 md:py-48 overflow-hidden flex items-center justify-center">
@@ -35,7 +39,9 @@ export default function ParallaxQuote() {
           className="font-display font-black italic text-cream leading-tight mb-8"
           style={{ fontSize: 'clamp(2.5rem, 7vw, 5.5rem)' }}
         >
-          "Siempre hay una pizza<br />esperándote."
+          {lines.map((line, i) => (
+            <span key={i}>{line}{i < lines.length - 1 && <br />}</span>
+          ))}
         </blockquote>
         <cite className="font-body font-light text-cream/50 text-sm tracking-[0.3em] uppercase not-italic">
           — Picnic Trattoria Napoletana

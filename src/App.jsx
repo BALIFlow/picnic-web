@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LangProvider } from './i18n'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import MarqueeStrip from './components/MarqueeStrip'
@@ -9,10 +10,12 @@ import MenuSection from './components/MenuSection'
 import GallerySection from './components/GallerySection'
 import ReservasSection from './components/ReservasSection'
 import Footer from './components/Footer'
+import { useLang } from './i18n'
 
-export default function App() {
+function AppInner() {
   const [heroProgress, setHeroProgress] = useState(0)
   const heroComplete = heroProgress >= 0.99
+  const { t } = useLang()
 
   return (
     <div className="bg-black text-cream font-body">
@@ -27,7 +30,6 @@ export default function App() {
       <ReservasSection />
       <Footer />
 
-      {/* Sticky mobile reservation CTA */}
       {heroComplete && (
         <a
           href="#reservas"
@@ -37,9 +39,17 @@ export default function App() {
           style={{ whiteSpace: 'nowrap' }}
         >
           <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse flex-shrink-0" />
-          Reservar mesa
+          {t.mobileCta}
         </a>
       )}
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <LangProvider>
+      <AppInner />
+    </LangProvider>
   )
 }
