@@ -285,9 +285,9 @@ export default function HeroSection({ onProgressChange }) {
             {lang === 'es' ? 'IT' : 'ES'}
           </button>
 
-          {/* Reservation pill — center-bottom, fades in after first scroll */}
+          {/* Reservation pill — center-top, fades in after first scroll */}
           <a href="#reservas" style={{
-            position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+            position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)',
             zIndex: 30,
             opacity: scrollProgress > 0.05 && !showHero ? 1 : 0,
             transition: 'opacity 0.5s ease',
