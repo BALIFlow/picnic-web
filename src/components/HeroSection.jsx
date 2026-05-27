@@ -2,15 +2,15 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 
 export const HERO_HEIGHT_VH = 800
 
-// All 919 frames — full sequence from dough to finished pizza
+// 463 frames at 12fps, 960×540
 const FIRST_FRAME = 1
-const LAST_FRAME = 919
-const TOTAL_FRAMES = 919
-const FRAME_W = 1280
-const FRAME_H = 720
+const LAST_FRAME = 463
+const TOTAL_FRAMES = 463
+const FRAME_W = 960
+const FRAME_H = 540
 
-// 8 boundaries → 7 gaps, one phrase per clip
-const CLIP_BOUNDARIES = [1, 97, 218, 339, 460, 629, 750, 919].map(n => (n - 1) / 918)
+// 8 boundaries → 7 clips, one phrase per clip
+const CLIP_BOUNDARIES = [1, 49, 110, 171, 232, 317, 378, 463].map(n => (n - 1) / 462)
 const PHRASES = [
   { line1: 'Todo empieza',             line2: 'con la masa.' },
   { line1: 'Harina, agua y',           line2: 'un poco de cariño.' },
@@ -34,6 +34,7 @@ export default function HeroSection({ onProgressChange }) {
   const [loadedCount, setLoadedCount] = useState(0)
   const [totalToLoad] = useState(TOTAL_FRAMES)
   const [allLoaded, setAllLoaded] = useState(false)
+  const [readyToShow, setReadyToShow] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [inHero, setInHero] = useState(true)
 
@@ -55,6 +56,7 @@ export default function HeroSection({ onProgressChange }) {
           images[idx] = img
           loaded++
           setLoadedCount(loaded)
+          if (loaded === 30) setReadyToShow(true)
           if (loaded === count) setAllLoaded(true)
         }
         img.onerror = () => {
@@ -102,7 +104,7 @@ export default function HeroSection({ onProgressChange }) {
 
   // Resize + scroll
   useEffect(() => {
-    if (!allLoaded) return
+    if (!readyToShow) return
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -146,15 +148,15 @@ export default function HeroSection({ onProgressChange }) {
       window.removeEventListener('resize', setSize)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [allLoaded, drawFrame, onProgressChange])
+  }, [readyToShow, drawFrame, onProgressChange])
 
   const showHero = scrollProgress >= 0.93
   const loadPercent = Math.round((loadedCount / totalToLoad) * 100)
 
   return (
     <>
-      {/* Loading screen */}
-      {!allLoaded && (
+      {/* Loading screen — only until first 30 frames ready */}
+      {!readyToShow && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 999, background: '#000',
           display: 'flex', flexDirection: 'column',
@@ -178,7 +180,7 @@ export default function HeroSection({ onProgressChange }) {
       <div ref={containerRef} id="inicio" style={{ height: `${HERO_HEIGHT_VH}vh` }} />
 
       {/* Fixed canvas layer */}
-      {allLoaded && (
+      {readyToShow && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           zIndex: inHero ? 10 : -1,
@@ -243,7 +245,7 @@ export default function HeroSection({ onProgressChange }) {
                 }}>
                   <p style={{
                     fontFamily: '"Playfair Display", serif', fontStyle: 'italic',
-                    fontWeight: 400, fontSize: 'clamp(1.1rem, 2.8vw, 2.2rem)',
+                    fontWeight: 400, fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)',
                     color: 'rgba(247,243,237,0.92)', lineHeight: 1.25,
                     textShadow: '0 2px 24px rgba(0,0,0,0.9)',
                   }}>
