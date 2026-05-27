@@ -262,50 +262,46 @@ export default function HeroSection({ onProgressChange }) {
             </div>
           </div>
 
-          {/* Top-right: lang toggle (always) + reservation pill (after first scroll) */}
-          <div style={{
-            position: 'absolute', top: '24px', right: '24px',
-            display: 'flex', alignItems: 'center', gap: '8px',
-            zIndex: 30,
-            opacity: !showHero ? 1 : 0,
-            transition: 'opacity 0.5s ease',
-            pointerEvents: !showHero ? 'auto' : 'none',
-          }}>
-            <button
-              onClick={toggle}
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(247,243,237,0.25)',
-                color: '#f7f3ed',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '11px',
-                fontWeight: 500,
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                padding: '10px 16px',
-                borderRadius: '999px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {lang === 'es' ? 'IT' : 'ES'}
-            </button>
-            <a href="#reservas" style={{
-              opacity: scrollProgress > 0.05 ? 1 : 0,
+          {/* Language toggle — top-right, always visible during hero */}
+          <button
+            onClick={toggle}
+            style={{
+              position: 'absolute', top: '24px', right: '24px',
+              zIndex: 30,
+              opacity: !showHero ? 1 : 0,
               transition: 'opacity 0.5s ease',
-              pointerEvents: scrollProgress > 0.05 ? 'auto' : 'none',
-              background: 'rgba(201,74,26,0.85)', backdropFilter: 'blur(8px)',
-              color: '#f7f3ed', fontFamily: 'Inter, sans-serif',
-              fontSize: '12px', fontWeight: 500, letterSpacing: '0.05em',
-              padding: '10px 20px', borderRadius: '999px',
-              textDecoration: 'none', whiteSpace: 'nowrap',
-            }}>
-              {t.hero.pill}
-            </a>
-          </div>
+              pointerEvents: !showHero ? 'auto' : 'none',
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(247,243,237,0.25)',
+              color: '#f7f3ed',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '11px', fontWeight: 500,
+              letterSpacing: '0.15em', textTransform: 'uppercase',
+              padding: '10px 16px', borderRadius: '999px',
+              cursor: 'pointer', whiteSpace: 'nowrap',
+            }}
+          >
+            {lang === 'es' ? 'IT' : 'ES'}
+          </button>
 
-          {/* Scroll indicator */}
+          {/* Reservation pill — center-bottom, fades in after first scroll */}
+          <a href="#reservas" style={{
+            position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 30,
+            opacity: scrollProgress > 0.05 && !showHero ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+            pointerEvents: scrollProgress > 0.05 && !showHero ? 'auto' : 'none',
+            background: 'rgba(201,74,26,0.85)', backdropFilter: 'blur(8px)',
+            color: '#f7f3ed', fontFamily: 'Inter, sans-serif',
+            fontSize: '12px', fontWeight: 500, letterSpacing: '0.05em',
+            padding: '10px 24px', borderRadius: '999px',
+            textDecoration: 'none', whiteSpace: 'nowrap',
+          }}>
+            {t.hero.pill}
+          </a>
+
+          {/* Scroll indicator — fades out once scrolling starts */}
           <div style={{
             position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',

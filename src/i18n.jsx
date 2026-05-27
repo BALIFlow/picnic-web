@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 export const translations = {
   es: {
@@ -258,10 +258,44 @@ export const translations = {
 
 const LangContext = createContext(null)
 
+// Italian-speaking countries (ISO 3166-1 alpha-2)
+const IT_COUNTRIES = new Set(['IT', 'SM', 'VA', 'CH'])
+
+async function detectLang() {
+  // 1. Honour an explicit previous choice stored in sessionStorage
+  const stored = sessionStorage.getItem('picnic_lang')
+  if (stored === 'es' || stored === 'it') return stored
+
+  // 2. Try browser language hint first (fast, no network)
+  const browserLang = (navigator.language || '').toLowerCase()
+  if (browserLang.startsWith('it')) return 'it'
+
+  // 3. Geo-IP via a free, no-auth API
+  try {
+    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) })
+    const data = await res.json()
+    if (IT_COUNTRIES.has(data.country_code)) return 'it'
+  } catch {
+    // network unavailable — fall through to default
+  }
+
+  return 'es'
+}
+
 export function LangProvider({ children }) {
   const [lang, setLang] = useState('es')
+
+  useEffect(() => {
+    detectLang().then(detected => setLang(detected))
+  }, [])
+
+  const toggle = () => {
+    const next = lang === 'es' ? 'it' : 'es'
+    sessionStorage.setItem('picnic_lang', next)
+    setLang(next)
+  }
+
   const t = translations[lang]
-  const toggle = () => setLang(l => l === 'es' ? 'it' : 'es')
   return <LangContext.Provider value={{ lang, t, toggle }}>{children}</LangContext.Provider>
 }
 
