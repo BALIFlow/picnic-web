@@ -4,9 +4,18 @@ import { useLang } from '../i18n'
 
 const VAPI_PUBLIC_KEY = '9a9c7215-0f7c-4d07-b089-6d4b9f6020f6'
 
+// Asistentes Vapi por tenant. Para probar otro agente: ?tenant=oraz en la URL,
+// o usa el selector que aparece sólo en modo prueba.
+//
+// `picnic` es la PLANTILLA dorada (de la que se clonan los demás), no un cliente:
+// se deja para demo. `oraz` y `bali` son los clientes reales con su propio clon
+// Vapi. Cada tenant lleva su idioma y zona horaria para que las fechas que el
+// agente pronuncia salgan localizadas y completas. Para añadir un tenant nuevo:
+// una línea aquí con su assistantId (Vapi), lang y tz.
 const TENANTS = {
-  picnic: { label: 'Picnic', assistantId: '6c92f776-abb2-4175-8a55-45d76ec01d1a' },
-  oraz: { label: 'oraz', assistantId: 'fd14e9ef-adc8-4392-9823-573070829c39' },
+  picnic: { label: 'Picnic (demo)', assistantId: '6c92f776-abb2-4175-8a55-45d76ec01d1a', lang: 'es', tz: 'Atlantic/Canary' },
+  oraz: { label: 'Oraz', assistantId: '9a1174e4-770e-41f8-b539-7af2e98075ca', lang: 'it', tz: 'Europe/Rome' },
+  bali: { label: 'BALI Rest', assistantId: '3deb5b44-b5e8-497d-84c2-da3743c67441', lang: 'es', tz: 'Atlantic/Canary' },
 }
 const DEFAULT_TENANT = 'picnic'
 
@@ -18,18 +27,33 @@ function readTenantFromUrl() {
   return { tenant: TENANTS[t] ? t : DEFAULT_TENANT, showPicker }
 }
 
-function getVariables() {
-  const fmt = (d) =>
-    d.toLocaleDateString('es-ES', { timeZone: 'Atlantic/Canary', year: 'numeric', month: '2-digit', day: '2-digit' })
-      .split('/').reverse().join('-')
-  const dayName = (d) => d.toLocaleDateString('es-ES', { timeZone: 'Atlantic/Canary', weekday: 'long' })
-  const time = new Date().toLocaleTimeString('es-ES', { timeZone: 'Atlantic/Canary', hour: '2-digit', minute: '2-digit', hour12: false })
+// Date variables the Vapi assistant fills into its prompt header. We hand the
+// agent the date ALREADY spelled out in full and localized — e.g. "lunes 1 de
+// junio de 2026" — so it reads it verbatim and never says an ISO string. Mirrors
+// the CRM's formatDateFull (src/lib/format-date.ts): same weekday + month names,
+// same 4 languages, so the spoken date matches what WhatsApp writes.
+const LOCALE = { es: 'es-ES', it: 'it-IT', en: 'en-GB', de: 'de-DE' }
+
+function formatDateFull(d, lang, tz) {
+  const loc = LOCALE[lang] || LOCALE.es
+  // Intl already localizes weekday + month; the long format reads naturally in
+  // every target language (es "lunes, 1 de junio de 2026", it "lunedì 1 giugno
+  // 2026", en "Monday, 1 June 2026", de "Montag, 1. Juni 2026").
+  return d.toLocaleDateString(loc, {
+    timeZone: tz, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+}
+
+function getVariables(lang = 'es', tz = 'Atlantic/Canary') {
+  const time = new Date().toLocaleTimeString(LOCALE[lang] || LOCALE.es, {
+    timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false,
+  })
   const today = new Date()
   const tomorrow = new Date(today.getTime() + 86400000)
   return {
-    current_date: `${fmt(today)} (${dayName(today)})`,
+    current_date: formatDateFull(today, lang, tz),
     current_time: time,
-    tomorrow_date: `${fmt(tomorrow)} (${dayName(tomorrow)})`,
+    tomorrow_date: formatDateFull(tomorrow, lang, tz),
   }
 }
 
@@ -64,8 +88,8 @@ export default function ReservasSection() {
     setLoading(true)
     try {
       const v = await getVapi()
-      const assistantId = TENANTS[tenant]?.assistantId ?? TENANTS[DEFAULT_TENANT].assistantId
-      await v.start(assistantId, { variableValues: getVariables() })
+      const cfg = TENANTS[tenant] ?? TENANTS[DEFAULT_TENANT]
+      await v.start(cfg.assistantId, { variableValues: getVariables(cfg.lang, cfg.tz) })
       setCallActive(true)
     } catch (e) {
       console.error('Vapi start error:', e)
