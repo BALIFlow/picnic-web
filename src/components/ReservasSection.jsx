@@ -13,13 +13,14 @@ const VAPI_PUBLIC_KEY = '9a9c7215-0f7c-4d07-b089-6d4b9f6020f6'
 // it for ALL tenants, with no per-tenant clone and no re-sync.
 //
 // To add a new restaurant: one line here mapping its slug to its CRM tenant id.
+// Picnic is NOT listed: it's the legacy template the shared engine was built
+// from (like the chat's motore unico), not a restaurant with its own voice.
 const CRM_BASE = 'https://crm.baliflowagency.com'
 const TENANTS = {
-  picnic: { label: 'Picnic (demo)', tenantId: '626547ff-bc44-4f35-8f42-0e97f1dcf0d5' },
   oraz: { label: 'Oraz', tenantId: '93eebe9c-8af5-4ca5-a315-3376ef4976e5' },
   bali: { label: 'BALI Rest', tenantId: 'a085e5bb-11f3-47f9-96da-c6cfdbff2ea0' },
 }
-const DEFAULT_TENANT = 'picnic'
+const DEFAULT_TENANT = 'oraz'
 
 function readTenantFromUrl() {
   if (typeof window === 'undefined') return { tenant: DEFAULT_TENANT, showPicker: false }
