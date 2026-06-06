@@ -4,18 +4,20 @@ import { useLang } from '../i18n'
 
 const VAPI_PUBLIC_KEY = '9a9c7215-0f7c-4d07-b089-6d4b9f6020f6'
 
-// Asistentes Vapi por tenant. Para probar otro agente: ?tenant=oraz en la URL,
-// o usa el selector que aparece sólo en modo prueba.
+// Voice "motore unico": there is ONE shared Vapi engine assistant for every
+// restaurant. We don't pick an assistant per tenant anymore — we ask the CRM
+// for this tenant's call config (the system prompt composed fresh from the
+// single source of truth: the code template + the live DB menu/hours/KB, plus
+// the localized date header and metadata.tenant_id) and start the engine with
+// those overrides. Change the template or any DB value → the next call reflects
+// it for ALL tenants, with no per-tenant clone and no re-sync.
 //
-// `picnic` es la PLANTILLA dorada (de la que se clonan los demás), no un cliente:
-// se deja para demo. `oraz` y `bali` son los clientes reales con su propio clon
-// Vapi. Cada tenant lleva su idioma y zona horaria para que las fechas que el
-// agente pronuncia salgan localizadas y completas. Para añadir un tenant nuevo:
-// una línea aquí con su assistantId (Vapi), lang y tz.
+// To add a new restaurant: one line here mapping its slug to its CRM tenant id.
+const CRM_BASE = 'https://crm.baliflowagency.com'
 const TENANTS = {
-  picnic: { label: 'Picnic (demo)', assistantId: '6c92f776-abb2-4175-8a55-45d76ec01d1a', lang: 'es', tz: 'Atlantic/Canary' },
-  oraz: { label: 'Oraz', assistantId: '9a1174e4-770e-41f8-b539-7af2e98075ca', lang: 'it', tz: 'Europe/Rome' },
-  bali: { label: 'BALI Rest', assistantId: '3deb5b44-b5e8-497d-84c2-da3743c67441', lang: 'es', tz: 'Atlantic/Canary' },
+  picnic: { label: 'Picnic (demo)', tenantId: '626547ff-bc44-4f35-8f42-0e97f1dcf0d5' },
+  oraz: { label: 'Oraz', tenantId: '93eebe9c-8af5-4ca5-a315-3376ef4976e5' },
+  bali: { label: 'BALI Rest', tenantId: 'a085e5bb-11f3-47f9-96da-c6cfdbff2ea0' },
 }
 const DEFAULT_TENANT = 'picnic'
 
@@ -27,34 +29,12 @@ function readTenantFromUrl() {
   return { tenant: TENANTS[t] ? t : DEFAULT_TENANT, showPicker }
 }
 
-// Date variables the Vapi assistant fills into its prompt header. We hand the
-// agent the date ALREADY spelled out in full and localized — e.g. "lunes 1 de
-// junio de 2026" — so it reads it verbatim and never says an ISO string. Mirrors
-// the CRM's formatDateFull (src/lib/format-date.ts): same weekday + month names,
-// same 4 languages, so the spoken date matches what WhatsApp writes.
-const LOCALE = { es: 'es-ES', it: 'it-IT', en: 'en-GB', de: 'de-DE' }
-
-function formatDateFull(d, lang, tz) {
-  const loc = LOCALE[lang] || LOCALE.es
-  // Intl already localizes weekday + month; the long format reads naturally in
-  // every target language (es "lunes, 1 de junio de 2026", it "lunedì 1 giugno
-  // 2026", en "Monday, 1 June 2026", de "Montag, 1. Juni 2026").
-  return d.toLocaleDateString(loc, {
-    timeZone: tz, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
-}
-
-function getVariables(lang = 'es', tz = 'Atlantic/Canary') {
-  const time = new Date().toLocaleTimeString(LOCALE[lang] || LOCALE.es, {
-    timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false,
-  })
-  const today = new Date()
-  const tomorrow = new Date(today.getTime() + 86400000)
-  return {
-    current_date: formatDateFull(today, lang, tz),
-    current_time: time,
-    tomorrow_date: formatDateFull(tomorrow, lang, tz),
-  }
+// Fetch the shared engine assistant id + per-tenant assistantOverrides (system
+// prompt, first message, localized date vars, metadata.tenant_id) from the CRM.
+async function fetchCallConfig(tenantId) {
+  const res = await fetch(`${CRM_BASE}/api/voice/overrides?tenant_id=${encodeURIComponent(tenantId)}`)
+  if (!res.ok) throw new Error(`overrides ${res.status}`)
+  return res.json() // { assistantId, assistantOverrides }
 }
 
 export default function ReservasSection() {
@@ -88,8 +68,9 @@ export default function ReservasSection() {
     setLoading(true)
     try {
       const v = await getVapi()
-      const cfg = TENANTS[tenant] ?? TENANTS[DEFAULT_TENANT]
-      await v.start(cfg.assistantId, { variableValues: getVariables(cfg.lang, cfg.tz) })
+      const t = TENANTS[tenant] ?? TENANTS[DEFAULT_TENANT]
+      const { assistantId, assistantOverrides } = await fetchCallConfig(t.tenantId)
+      await v.start(assistantId, assistantOverrides)
       setCallActive(true)
     } catch (e) {
       console.error('Vapi start error:', e)
