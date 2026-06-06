@@ -23,11 +23,10 @@ const TENANTS = {
 const DEFAULT_TENANT = 'oraz'
 
 function readTenantFromUrl() {
-  if (typeof window === 'undefined') return { tenant: DEFAULT_TENANT, showPicker: false }
+  if (typeof window === 'undefined') return DEFAULT_TENANT
   const p = new URLSearchParams(window.location.search)
   const t = (p.get('tenant') || '').toLowerCase()
-  const showPicker = p.has('tenant') || p.get('test') === '1'
-  return { tenant: TENANTS[t] ? t : DEFAULT_TENANT, showPicker }
+  return TENANTS[t] ? t : DEFAULT_TENANT
 }
 
 // Fetch the shared engine assistant id + per-tenant assistantOverrides (system
@@ -46,7 +45,7 @@ export default function ReservasSection() {
   const [callActive, setCallActive] = useState(false)
   const [loading, setLoading] = useState(false)
   const vapiRef = useRef(null)
-  const [{ tenant, showPicker }, setTenantState] = useState(readTenantFromUrl)
+  const [tenant, setTenant] = useState(readTenantFromUrl)
 
   const getVapi = async () => {
     if (vapiRef.current) return vapiRef.current
@@ -103,21 +102,19 @@ export default function ReservasSection() {
               {r.whatsapp}
             </a>
 
-            {showPicker && (
-              <label className="flex items-center gap-2 text-cream font-body text-xs">
-                <span className="uppercase tracking-[0.2em]">Prueba — agente:</span>
-                <select
-                  value={tenant}
-                  disabled={callActive || loading}
-                  onChange={(e) => setTenantState((s) => ({ ...s, tenant: e.target.value }))}
-                  className="bg-dark/60 border border-cream/30 text-cream rounded-full px-3 py-1.5 font-body text-xs focus:outline-none focus:border-cream/60 disabled:opacity-50"
-                >
-                  {Object.entries(TENANTS).map(([key, t]) => (
-                    <option key={key} value={key} className="text-dark">{t.label}</option>
-                  ))}
-                </select>
-              </label>
-            )}
+            <label className="flex items-center gap-2 text-cream font-body text-xs">
+              <span className="uppercase tracking-[0.2em]">Prueba — agente:</span>
+              <select
+                value={tenant}
+                disabled={callActive || loading}
+                onChange={(e) => setTenant(e.target.value)}
+                className="bg-dark/60 border border-cream/30 text-cream rounded-full px-3 py-1.5 font-body text-xs focus:outline-none focus:border-cream/60 disabled:opacity-50"
+              >
+                {Object.entries(TENANTS).map(([key, tn]) => (
+                  <option key={key} value={key} className="text-dark">{tn.label}</option>
+                ))}
+              </select>
+            </label>
 
             <button
               onClick={handleCall}
@@ -130,7 +127,7 @@ export default function ReservasSection() {
                 name={callActive ? 'stop-circle-outline' : 'call-outline'}
                 style={{ fontSize: '1.1rem', animation: callActive ? 'pulse 1s infinite' : 'none' }}
               ></ion-icon>
-              {loading ? r.calling : callActive ? r.hangup : showPicker ? `Llamar — ${TENANTS[tenant]?.label ?? ''}` : r.call}
+              {loading ? r.calling : callActive ? r.hangup : `Llamar — ${TENANTS[tenant]?.label ?? ''}`}
             </button>
 
             <a href="https://maps.google.com"
