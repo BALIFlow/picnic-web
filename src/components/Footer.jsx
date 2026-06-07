@@ -11,12 +11,12 @@ export default function Footer() {
         <div className="grid md:grid-cols-3 gap-12 mb-16">
           <div>
             <p className="font-display font-black text-cream text-2xl tracking-tight mb-1">PICNIC</p>
-            <p className="font-body text-cream/40 text-[10px] tracking-[0.25em] uppercase mb-4">Trattoria Napoletana</p>
-            <p className="font-body font-light text-cream/40 text-sm leading-relaxed whitespace-pre-line">{tagline}</p>
+            <p className="font-body text-cream text-[10px] tracking-[0.25em] uppercase mb-4">Trattoria Napoletana</p>
+            <p className="font-body font-light text-cream text-sm leading-relaxed whitespace-pre-line">{tagline}</p>
           </div>
 
           <div>
-            <p className="font-body text-cream/30 text-xs tracking-[0.2em] uppercase mb-5">{navLabel}</p>
+            <p className="font-body text-cream text-xs tracking-[0.2em] uppercase mb-5">{navLabel}</p>
             <ul className="space-y-3">
               {t.nav.links.map((l, i) => (
                 <li key={l}>
@@ -27,7 +27,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-body text-cream/30 text-xs tracking-[0.2em] uppercase mb-5">{contactLabel}</p>
+            <p className="font-body text-cream text-xs tracking-[0.2em] uppercase mb-5">{contactLabel}</p>
             <div className="space-y-2 mb-6">
               <p className="font-body font-light text-cream text-sm flex items-center gap-2"><ion-icon name="location-outline"></ion-icon> Av. Rafael Cabrera, 7 · Las Palmas</p>
               <p className="font-body font-light text-cream text-sm flex items-center gap-2"><ion-icon name="call-outline"></ion-icon> +34 828 712 623</p>
@@ -40,8 +40,8 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="font-body font-light text-cream/20 text-xs">{copyright}</p>
-          <p className="font-body font-light text-cream/20 text-xs italic">{madeWith}</p>
+          <p className="font-body font-light text-cream text-xs">{copyright}</p>
+          <p className="font-body font-light text-cream text-xs italic">{madeWith}</p>
         </div>
       </div>
     </footer>
