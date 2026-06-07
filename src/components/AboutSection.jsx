@@ -40,7 +40,7 @@ export default function AboutSection() {
             {title}<br />
             <span className="italic font-normal">{titleItalic}</span>
           </h2>
-          <p className="font-body font-light text-dark/70 text-base leading-relaxed mb-10">{body}</p>
+          <p className="font-body font-light text-dark text-base leading-relaxed mb-10">{body}</p>
 
           <div className="grid grid-cols-1 gap-6">
             {pillars.map((p, i) => (
@@ -48,7 +48,7 @@ export default function AboutSection() {
                 <ion-icon name={ICONS[i]} style={{ fontSize: '1.5rem', color: '#c94a1a', flexShrink: 0, marginTop: '2px' }}></ion-icon>
                 <div>
                   <p className="font-body font-semibold text-dark text-sm mb-1">{p.title}</p>
-                  <p className="font-body font-light text-dark/60 text-sm">{p.desc}</p>
+                  <p className="font-body font-light text-dark text-sm">{p.desc}</p>
                 </div>
               </div>
             ))}
