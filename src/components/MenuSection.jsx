@@ -23,7 +23,7 @@ export default function MenuSection() {
               className={`font-body text-sm px-5 py-3 border-b-2 transition-all duration-300 -mb-px ${
                 activeIdx === i
                   ? 'text-rust border-rust font-medium'
-                  : 'text-dark/40 border-transparent hover:text-dark/70'
+                  : 'text-dark border-transparent hover:text-dark/70'
               }`}>
               {tab}
             </button>
@@ -36,7 +36,7 @@ export default function MenuSection() {
               className="flex items-start justify-between gap-4 py-5 px-2 border-b border-dark/8 group hover:bg-rust/3 transition-colors duration-200 rounded-sm">
               <div>
                 <p className="font-display font-medium text-dark text-base mb-1 group-hover:text-rust transition-colors duration-200">{item.name}</p>
-                <p className="font-body font-light text-dark/50 text-sm leading-relaxed">{item.desc}</p>
+                <p className="font-body font-light text-dark text-sm leading-relaxed">{item.desc}</p>
               </div>
               <p className="font-body font-semibold text-rust text-sm shrink-0 mt-0.5">{item.price}</p>
             </div>
