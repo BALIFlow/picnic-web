@@ -16,7 +16,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-body text-cream text-xs tracking-[0.2em] uppercase mb-5">{navLabel}</p>
+            <p className="font-body font-bold text-cream text-xs tracking-[0.2em] uppercase mb-5">{navLabel}</p>
             <ul className="space-y-3">
               {t.nav.links.map((l, i) => (
                 <li key={l}>
@@ -27,7 +27,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-body text-cream text-xs tracking-[0.2em] uppercase mb-5">{contactLabel}</p>
+            <p className="font-body font-bold text-cream text-xs tracking-[0.2em] uppercase mb-5">{contactLabel}</p>
             <div className="space-y-2 mb-6">
               <p className="font-body font-light text-cream text-sm flex items-center gap-2"><ion-icon name="location-outline"></ion-icon> Av. Rafael Cabrera, 7 · Las Palmas</p>
               <p className="font-body font-light text-cream text-sm flex items-center gap-2"><ion-icon name="call-outline"></ion-icon> +34 828 712 623</p>
